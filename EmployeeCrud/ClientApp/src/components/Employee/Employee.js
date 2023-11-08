@@ -1,9 +1,11 @@
 ﻿import React, { Fragment, useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function Employee() {
 
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
+    const [loading, setLoading] = useState(false); 
 
     const posts = [
         { id: 1, name: 'Hello World', address: 'Welcome to learning React!' },
@@ -12,8 +14,12 @@ export default function Employee() {
 
     const [data, setData] = useState([]);
 
+    console.log("data", data)
+
     useEffect(() => {
-        setData(posts);
+
+      fetchEmployeeData();
+       
     }, []);
 
     function handleEdit(id) {
@@ -24,8 +30,46 @@ export default function Employee() {
         alert(id)
     }
 
-    function handleSave(id) {
-        alert(id)
+    function handleSave() {
+
+        const model = {
+            Name: name,
+            Address: address,
+            Id: 0,
+        }
+
+        SaveEmployee(model)
+
+    }
+
+    async function SaveEmployee(saveModel) {
+
+
+        const url = `http://localhost:44461/api/employee/SaveEmployeeAsync`;
+
+        try {
+            const response = await axios.post(url, saveModel);
+            console.log("response", response.data);
+            setData(response.data);
+
+        } catch (error) {
+            // Handle any errors
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+    async function fetchEmployeeData() {
+        try {
+            setLoading(true); // Set loading state to true
+            const response = await axios.get("http://localhost:44461/api/employee/GetEmployeesAsync");
+            setData(response.data);
+        } catch (error) {
+            // Handle any errors here
+            console.error("Error:", error);
+        } finally {
+            setLoading(false); // Set loading state to false when done
+        }
     }
 
     return (
@@ -42,7 +86,7 @@ export default function Employee() {
                     <input type="text" name="address" value={address} onChange={((e) => setAddress(e.target.value))} />
                 </div>
                 <div>
-                    <button onClick={(()=>handleSave()) }>Save</button>
+                    <button onClick={(() => handleSave())}>Save</button>
                 </div>
             </div>
             <div>
