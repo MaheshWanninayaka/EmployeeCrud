@@ -5,7 +5,9 @@ export default function Employee() {
 
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
+    const [update, setUpdate] = useState(false);
+    const [upId, setUpId] = useState(0);
 
     const posts = [
         { id: 1, name: 'Hello World', address: 'Welcome to learning React!' },
@@ -18,12 +20,19 @@ export default function Employee() {
 
     useEffect(() => {
 
-      fetchEmployeeData();
-       
+        fetchEmployeeData();
+
     }, []);
 
     function handleEdit(id) {
-        alert(id)
+        //alert(id)
+        var employee = data.filter(x => x.id === id)[0];
+        console.log("employee", employee)
+        setName(employee.name);
+        setAddress(employee.address);
+        setUpId(id);
+        setUpdate(true);
+
     }
 
     function handleDelete(id) {
@@ -35,10 +44,14 @@ export default function Employee() {
         const model = {
             Name: name,
             Address: address,
-            Id: 0,
+            Id: !update ? 0 : upId,
         }
 
-        SaveEmployee(model)
+        if (!update) {
+            SaveEmployee(model);
+        } else {
+            UpdateEmployee(model);
+        }
 
     }
 
@@ -51,6 +64,24 @@ export default function Employee() {
             const response = await axios.post(url, saveModel);
             console.log("response", response.data);
             setData(response.data);
+
+        } catch (error) {
+            // Handle any errors
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+
+    async function UpdateEmployee(saveModel) {
+
+        console.log("saveModel", saveModel);
+        const url = `http://localhost:44461/api/employee/UpdateEmployeeAsync`;
+
+        try {
+            const response = await axios.post(url, saveModel);
+            //  console.log("response", response.data);
+            // setData(response.data);
 
         } catch (error) {
             // Handle any errors
@@ -86,7 +117,7 @@ export default function Employee() {
                     <input type="text" name="address" value={address} onChange={((e) => setAddress(e.target.value))} />
                 </div>
                 <div>
-                    <button onClick={(() => handleSave())}>Save</button>
+                    <button onClick={(() => handleSave())}>{update ? "Update" : " Save"}</button>
                 </div>
             </div>
             <div>
@@ -101,19 +132,20 @@ export default function Employee() {
                     </thead>
                     <tbody>
                         {
-                            data.map((item, index) => {
-                                return (
-                                    <tr>
-                                        <td>{item.id}</td>
-                                        <td>{item.name}</td>
-                                        <td>{item.address}</td>
-                                        <td>
-                                            <button onClick={(() => handleEdit(item.id))}>Edit</button> &nbsp;
-                                            <button onClick={(() => handleDelete(item.id))}>Delete</button>
-                                        </td>
-                                    </tr>
-                                )
-                            })}
+                            data.length > 0 ?
+                                data.map((item, index) => {
+                                    return (
+                                        <tr>
+                                            <td>{item.id}</td>
+                                            <td>{item.name}</td>
+                                            <td>{item.address}</td>
+                                            <td>
+                                                <button onClick={(() => handleEdit(item.id))}>Edit</button> &nbsp;
+                                                <button onClick={(() => handleDelete(item.id))}>Delete</button>
+                                            </td>
+                                        </tr>
+                                    )
+                                }) : null}
 
                     </tbody>
 

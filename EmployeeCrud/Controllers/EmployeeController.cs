@@ -70,5 +70,28 @@ namespace EmployeeCrud.Controllers
             await _employeeContext.SaveChangesAsync();
             return true;
         }
+
+        [HttpPost]
+        [Route("UpdateEmployeeAsync")]
+        public async Task<bool> UpdateEmployeeAsync(Employee employee)
+        {
+            if (employee != null)
+            {
+                var exEmployee = await _employeeContext.Employees.FirstOrDefaultAsync(x => x.Id == employee.Id);
+
+                if (exEmployee != null)
+                {
+                    exEmployee.Name = employee.Name;
+                    exEmployee.Address = employee.Address;
+
+                    _employeeContext.Entry(exEmployee).State = EntityState.Modified;
+
+                    var result = _employeeContext.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
     }
 }
